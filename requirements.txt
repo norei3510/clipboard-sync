@@ -1,0 +1,7 @@
+fastapi
+uvicorn[standard]
+pyperclip
+python-dotenv
+python-multipart
+Pillow
+pywin32; platform_system == "Windows"
