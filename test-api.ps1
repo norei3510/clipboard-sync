@@ -40,6 +40,21 @@ if ($textResponse.text -ne $text -or $textGet.text -ne $text) {
     exit 1
 }
 
+$jsonText = "160.26.235.34"
+$jsonBody = @{ text = $jsonText } | ConvertTo-Json -Compress
+$jsonTextResponse = Invoke-RestMethod `
+    -Method Post `
+    -Uri "$baseUrl/clipboard/text" `
+    -Headers $headers `
+    -ContentType "text/plain; charset=utf-8" `
+    -Body $jsonBody
+$jsonTextGet = Invoke-RestMethod -Uri "$baseUrl/clipboard/text" -Headers $headers
+
+if ($jsonTextResponse.text -ne $jsonText -or $jsonTextGet.text -ne $jsonText) {
+    Write-Error "JSON text field extraction test failed."
+    exit 1
+}
+
 $imagePath = Join-Path $workDir "sample.png"
 $imageBytes = [Convert]::FromBase64String(
     "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII="

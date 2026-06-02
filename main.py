@@ -1,6 +1,7 @@
 import os
 import re
 import struct
+import json
 from datetime import datetime, timezone
 from io import BytesIO
 from pathlib import Path
@@ -120,26 +121,43 @@ async def set_clipboard(
 
 async def read_clipboard_text(request: Request) -> str:
     content_type = request.headers.get("content-type", "").lower()
+    body = await request.body()
 
     if "application/json" in content_type:
+        return parse_clipboard_json(body)
+
+    text = body.decode("utf-8")
+
+    if looks_like_json_object(text):
         try:
-            payload = await request.json()
-        except ValueError as exc:
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Invalid JSON body",
-            ) from exc
+            return parse_clipboard_json(body)
+        except HTTPException:
+            pass
 
-        if not isinstance(payload, dict) or not isinstance(payload.get("text"), str):
-            raise HTTPException(
-                status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail='JSON body must be like {"text": "clipboard text"}',
-            )
+    return text
 
-        return ClipboardRequest(text=payload["text"]).text
 
-    body = await request.body()
-    return body.decode("utf-8")
+def parse_clipboard_json(body: bytes) -> str:
+    try:
+        payload = json.loads(body.decode("utf-8"))
+    except ValueError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid JSON body",
+        ) from exc
+
+    if not isinstance(payload, dict) or not isinstance(payload.get("text"), str):
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail='JSON body must be like {"text": "clipboard text"}',
+        )
+
+    return ClipboardRequest(text=payload["text"]).text
+
+
+def looks_like_json_object(text: str) -> bool:
+    stripped = text.strip()
+    return stripped.startswith("{") and stripped.endswith("}")
 
 
 async def save_upload(upload: UploadFile, upload_dir: Path) -> Path:
