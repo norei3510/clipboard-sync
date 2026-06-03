@@ -71,7 +71,7 @@ stop-server.bat
 
 ## PC起動中いつでも使えるようにする
 
-Windows にログオンしたとき、自動で `start-server.bat` が非表示起動するランチャーをスタートアップフォルダに登録できます。
+Windows にログオンしたとき、自動で `start-server.bat` が非表示起動するランチャーを登録できます。登録は管理者権限なしで、スタートアップフォルダと現在ユーザーの `Run` レジストリに入ります。
 
 ```bat
 install-startup-task.bat
@@ -90,6 +90,8 @@ uninstall-startup-task.bat
 ```
 
 登録後は、次回ログオンから Clipboard Sync API が自動起動します。すぐ使いたい場合は、その場で `start-server.bat` も実行してください。
+
+自動起動時のログは `logs/server.log` に出ます。スマホから接続できないときは、まず `status-startup-task.bat` と `logs/server.log` を確認してください。
 
 iPhone からは Windows PC の LAN 内 IP アドレスを使います。現在この PC の Wi-Fi IPv4 アドレスは `YOUR_PC_IP` です。
 

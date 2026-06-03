@@ -23,6 +23,7 @@ venv/
 env/
 
 *.log
+logs/
 *.tmp
 
 # Local notes that may contain API_TOKEN values, real usernames, IPs, or paths.
